@@ -1,0 +1,138 @@
+From 4b1602673bf9c8d5b8f988182d0bb997cf5c635e Mon Sep 17 00:00:00 2001
+From: Dylan Aviles <37839398+davil544@users.noreply.github.com>
+Date: Sun, 13 Sep 2026 21:29:37 -0400
+Subject: [PATCH] Add CMake buildsystem and required files
+
+---
+ CMakeLists.txt               | 76 ++++++++++++++++++++++++++++++++++++
+ cmake/libicnsConfig.cmake.in |  8 ++++
+ src/config.h                 | 17 ++++++++
+ 3 files changed, 101 insertions(+)
+ create mode 100644 CMakeLists.txt
+ create mode 100644 cmake/libicnsConfig.cmake.in
+ create mode 100644 src/config.h
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+new file mode 100644
+index 0000000..6a704ac
+--- /dev/null
++++ b/CMakeLists.txt
+@@ -0,0 +1,76 @@
++cmake_minimum_required(VERSION 3.10)
++
++project(libicns VERSION 0.9.0 LANGUAGES C)
++
++set(LIBICNS_SOURCES
++    src/icns_debug.c
++    src/icns_element.c
++    src/icns_family.c
++    src/icns_image.c
++    src/icns_io.c
++    src/icns_jp2.c
++    src/icns_png.c
++    src/icns_rle24.c
++    src/icns_utils.c
++)
++
++set(LIBICNS_HEADERS
++    src/icns.h
++    src/icns_colormaps.h
++    src/icns_internals.h
++    src/config.h
++)
++
++add_library(icns ${LIBICNS_SOURCES})
++add_library(libicns::libicns ALIAS icns)
++
++target_include_directories(icns
++    PUBLIC
++        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
++        $<INSTALL_INTERFACE:include>
++)
++
++# Dependencies
++find_package(ZLIB REQUIRED)
++find_package(PNG CONFIG REQUIRED)
++find_package(OpenJPEG CONFIG REQUIRED)
++
++target_link_libraries(icns PRIVATE
++    ZLIB::ZLIB
++    PNG::PNG
++    openjp2
++)
++
++include(GNUInstallDirs)
++
++install(
++    TARGETS icns
++    EXPORT libicnsTargets
++    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
++    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
++    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
++)
++
++install(
++    FILES ${LIBICNS_HEADERS}
++    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
++)
++
++install(
++    EXPORT libicnsTargets
++    NAMESPACE libicns::
++    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/libicns
++)
++
++include(CMakePackageConfigHelpers)
++
++configure_package_config_file(
++    cmake/libicnsConfig.cmake.in
++    ${CMAKE_CURRENT_BINARY_DIR}/libicnsConfig.cmake
++    INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/libicns
++)
++
++install(
++    FILES ${CMAKE_CURRENT_BINARY_DIR}/libicnsConfig.cmake
++    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/libicns
++)
+\ No newline at end of file
+diff --git a/cmake/libicnsConfig.cmake.in b/cmake/libicnsConfig.cmake.in
+new file mode 100644
+index 0000000..d7d3ef2
+--- /dev/null
++++ b/cmake/libicnsConfig.cmake.in
+@@ -0,0 +1,8 @@
++@PACKAGE_INIT@
++
++include(CMakeFindDependencyMacro)
++find_dependency(ZLIB)
++find_dependency(PNG CONFIG)
++find_dependency(OpenJPEG CONFIG)
++
++include("${CMAKE_CURRENT_LIST_DIR}/libicnsTargets.cmake")
+\ No newline at end of file
+diff --git a/src/config.h b/src/config.h
+new file mode 100644
+index 0000000..dc0bbff
+--- /dev/null
++++ b/src/config.h
+@@ -0,0 +1,17 @@
++#ifndef LIBICNS_CONFIG_H
++#define LIBICNS_CONFIG_H
++
++/* Standard headers */
++#define HAVE_STDINT_H 1
++#define HAVE_GETOPT_H 1
++
++/* Function availability */
++#define HAVE_GETOPT_LONG 1
++
++/* memcpy alignment support */
++#define HAVE_UNALIGNED_MEMCPY 1
++
++/* Codec support (libpng always required) */
++#define HAVE_PNG_H 1
++
++#endif
+\ No newline at end of file
+-- 
+2.45.1.windows.1
