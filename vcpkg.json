@@ -3,7 +3,7 @@
   "version": "0.9.0-dev",
   "description": "Library for reading and writing Apple Icon Image format (ICNS)",
   "license": "GPL-2.0",
-  "supports": "linux | osx",
+  "supports": "linux | osx | windows",
   "dependencies": [
     "libpng",
     "openjpeg",

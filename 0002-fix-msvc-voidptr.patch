@@ -1,0 +1,24 @@
+From 913f6e9494bffaab2cba722c67e1726148776465 Mon Sep 17 00:00:00 2001
+From: Dylan Aviles <37839398+davil544@users.noreply.github.com>
+Date: Sun, 13 Sep 2026 21:34:49 -0400
+Subject: [PATCH] Fix MSVC void* arithmetic in icns_png_write_memory
+
+---
+ src/icns_png.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/icns_png.c b/src/icns_png.c
+index 4f5d433..ddd850d 100644
+--- a/src/icns_png.c
++++ b/src/icns_png.c
+@@ -54,7 +54,7 @@ static void icns_png_write_memory(png_structp png_ptr, png_bytep data, png_size_
+     png_error(png_ptr, "Unable to allocate memory!");
+ 
+   /* copy new bytes to end of buffer */
+-  memcpy(_ref->data + _ref->offset, data, length);
++  memcpy((char*)_ref->data + _ref->offset, data, length);
+   _ref->offset += length;
+ }
+ 
+-- 
+2.45.1.windows.1
